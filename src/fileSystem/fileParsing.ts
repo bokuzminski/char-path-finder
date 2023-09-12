@@ -1,0 +1,62 @@
+import fs from "fs";
+import { ENDING_CHARACTER, STARTING_CHARACTER } from "../constants";
+
+export const MAP_FILES = {
+  first: "./puzzles/basic.txt",
+  goonies: "./puzzles/goonies.txt",
+  compact: "./puzzles/compact.txt",
+  intersection: "./puzzles/intersection.txt",
+  noStart: "./puzzles/missingStartCharacter.txt",
+  turnLetter: "./puzzles/lettersTurn.txt",
+};
+
+async function readFile(path: string) {
+  try {
+    return await fs.readFileSync(path, { encoding: "utf-8" });
+  } catch (error) {
+    throw new Error(`File not found: ${error}`);
+  }
+}
+
+export async function getMapFromFile(path: string) {
+  const loadedFile = await readFile(path);
+
+  return parseFileToMatrix(loadedFile);
+}
+
+function parseFileToMatrix(file: string) {
+  const fileLines = file.split("\n");
+  const parsedChars = fileLines.map((strItem) => strItem.split(""));
+  const { startingRowIndex, startingColumnIndex } = checkIfStartingAndEndSymbolExistCorrectly(parsedChars);
+
+  return { puzzle: parsedChars, startingRow: startingRowIndex, startingColumn: startingColumnIndex };
+}
+
+function checkIfStartingAndEndSymbolExistCorrectly(pathMap: string[][]) {
+  let numberOfStartSymbols = 0;
+  let numberOfEndSymbols = 0;
+  let startingRowIndex = 0;
+  let startingColumnIndex = 0;
+
+  pathMap.forEach((row, x) => {
+    row.forEach((character, y) => {
+      if (character === STARTING_CHARACTER) {
+        numberOfStartSymbols++;
+        startingRowIndex = x;
+        startingColumnIndex = y;
+      }
+      if (character === ENDING_CHARACTER) numberOfEndSymbols++;
+    });
+  });
+
+  const wrongAmountOfStartSymbols = numberOfStartSymbols !== 1;
+  const wrongAmountOfEndSymbols = numberOfEndSymbols !== 1;
+
+  if (wrongAmountOfStartSymbols || wrongAmountOfEndSymbols) {
+    throw new Error(
+      `There should only be 1 start and 1 end symbol. Got: @: ${numberOfStartSymbols}, x: ${numberOfEndSymbols}`
+    );
+  }
+
+  return { startingRowIndex, startingColumnIndex };
+}
