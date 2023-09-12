@@ -1,9 +1,10 @@
+import { MapFromFile } from "../../pathTraversal/pathTraversalModel";
 import { getMapFromFile } from "../fileParsing";
 
 describe("Test file loading and parsing", () => {
-  test("Test file loading works and returns correct values", async () => {
-    const correctValue = {
-      puzzle: [
+  test("Test file loading works and returns correct values", () => {
+    const correctValue: MapFromFile = {
+      map: [
         [" ", " ", " ", " ", " ", "+", "-", "O", "-", "N", "-", "+"],
         [" ", " ", " ", " ", " ", "|", " ", " ", " ", " ", " ", "|"],
         [" ", " ", " ", " ", " ", "|", " ", " ", " ", "+", "-", "I", "-", "+"],
@@ -17,8 +18,8 @@ describe("Test file loading and parsing", () => {
       startingColumn: 1,
     };
 
-    const map = await getMapFromFile("./puzzles/goonies.txt");
+    const result = getMapFromFile("./puzzles/goonies.txt");
 
-    expect(map).toEqual(correctValue);
+    expect(result).toEqual(correctValue);
   });
 });

@@ -3,18 +3,18 @@ import { followThePath } from "../pathTraversal";
 
 describe("Test bad inputs", () => {
   test("Broken path should throw an error", () => {
-    const { puzzle, startingRow, startingColumn } = getMapFromFile("./badPuzzles/brokenPath.txt");
-    expect(() => followThePath(puzzle, startingRow, startingColumn)).toThrowError("No possible moves available");
+    const map = getMapFromFile("./badPuzzles/brokenPath.txt");
+    expect(() => followThePath(map)).toThrowError("No possible moves available");
   });
 
   test("Fake turn should throw an error", () => {
-    const { puzzle, startingRow, startingColumn } = getMapFromFile("./badPuzzles/faketurn.txt");
-    expect(() => followThePath(puzzle, startingRow, startingColumn)).toThrowError("Fake turn");
+    const map = getMapFromFile("./badPuzzles/faketurn.txt");
+    expect(() => followThePath(map)).toThrowError("Fake turn");
   });
 
   test("Fork in the path should throw an error", () => {
-    const { puzzle, startingRow, startingColumn } = getMapFromFile("./badPuzzles/forkInPath.txt");
-    expect(() => followThePath(puzzle, startingRow, startingColumn)).toThrowError("Fork in the path");
+    const map = getMapFromFile("./badPuzzles/forkInPath.txt");
+    expect(() => followThePath(map)).toThrowError("Fork in the path");
   });
 
   test("Missing end character should throw an error", () => {
@@ -37,8 +37,10 @@ describe("Test bad inputs", () => {
   test("Multiple points of start should throw an error", () => {
     // Hardcoded because it has two "x" characters which throws the error before we start traversing
     const multipleStartingPaths = [["x", "-", "B", "-", "@", "-", "A", "-", "x"]];
-    const errorMessage = "Multiple points of start";
+    const errorMessage = "Multiple starting points";
 
-    expect(() => followThePath(multipleStartingPaths, 0, 4)).toThrowError(errorMessage);
+    expect(() => followThePath({ map: multipleStartingPaths, startingRow: 0, startingColumn: 4 })).toThrowError(
+      errorMessage
+    );
   });
 });
