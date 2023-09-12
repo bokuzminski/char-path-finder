@@ -33,4 +33,11 @@ describe("Test bad inputs", () => {
 
     await expect(() => getMapFromFile("./badPuzzles/multipleStarts.txt")).rejects.toThrowError(errorMessage);
   });
+
+  test("Multiple points of start should throw an error", () => {
+    const multipleStartingPaths = [["x", "-", "B", "-", "@", "-", "A", "-", "x"]];
+    const errorMessage = "Multiple points of start";
+
+    expect(() => followThePath(multipleStartingPaths, 0, 4)).toThrowError(errorMessage);
+  });
 });
