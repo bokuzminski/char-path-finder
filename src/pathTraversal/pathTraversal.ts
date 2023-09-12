@@ -6,16 +6,8 @@ import {
   STARTING_CHARACTER,
   UP_DOWN_CHARACTER,
 } from "../constants";
-import { characterIsLetterWeHaveToCollect } from "../helpers";
-import {
-  CollectedCharactersList,
-  MapFormat,
-  MapFromFile,
-  Move,
-  Path,
-  TraveledPathResult,
-  calculateTheMoveBasedOnIndexes,
-} from "./pathTraversalModel";
+import { calculateTheMoveBasedOnIndexes, characterIsLetterWeHaveToCollect } from "../helpers";
+import { CollectedCharactersList, MapFormat, MapFromFile, Move, Path, TraveledPathResult } from "./pathTraversalModel";
 
 export function followThePath({ map, startingRow, startingColumn }: MapFromFile): TraveledPathResult {
   let endReached = false;
