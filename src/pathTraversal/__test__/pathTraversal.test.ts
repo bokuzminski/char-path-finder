@@ -1,4 +1,4 @@
-import testCases from "../../../TEST_VALUES.json";
+import testCases from "../../__mocks__/TEST_VALUES.json";
 import { followThePath } from "../pathTraversal";
 
 describe("Test all the good puzzle inputs", () => {
