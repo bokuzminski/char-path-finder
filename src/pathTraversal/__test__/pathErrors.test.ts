@@ -2,39 +2,40 @@ import { getMapFromFile } from "../../fileSystem/fileParsing";
 import { followThePath } from "../pathTraversal";
 
 describe("Test bad inputs", () => {
-  test("Broken path should throw an error", async () => {
-    const { puzzle, startingRow, startingColumn } = await getMapFromFile("./badPuzzles/brokenPath.txt");
+  test("Broken path should throw an error", () => {
+    const { puzzle, startingRow, startingColumn } = getMapFromFile("./badPuzzles/brokenPath.txt");
     expect(() => followThePath(puzzle, startingRow, startingColumn)).toThrowError("No possible moves available");
   });
 
-  test("Fake turn should throw an error", async () => {
-    const { puzzle, startingRow, startingColumn } = await getMapFromFile("./badPuzzles/faketurn.txt");
+  test("Fake turn should throw an error", () => {
+    const { puzzle, startingRow, startingColumn } = getMapFromFile("./badPuzzles/faketurn.txt");
     expect(() => followThePath(puzzle, startingRow, startingColumn)).toThrowError("Fake turn");
   });
 
-  test("Fork in the path should throw an error", async () => {
-    const { puzzle, startingRow, startingColumn } = await getMapFromFile("./badPuzzles/forkInPath.txt");
+  test("Fork in the path should throw an error", () => {
+    const { puzzle, startingRow, startingColumn } = getMapFromFile("./badPuzzles/forkInPath.txt");
     expect(() => followThePath(puzzle, startingRow, startingColumn)).toThrowError("Fork in the path");
   });
 
-  test("Missing end character should throw an error", async () => {
+  test("Missing end character should throw an error", () => {
     const errorMessage = "There should only be 1 start and 1 end symbol. Got: @: 1, x: 0";
-    await expect(() => getMapFromFile("./badPuzzles/missingEndCharacter.txt")).rejects.toThrowError(errorMessage);
+    expect(() => getMapFromFile("./badPuzzles/missingEndCharacter.txt")).toThrowError(errorMessage);
   });
 
-  test("Missing start character should throw an error", async () => {
+  test("Missing start character should throw an error", () => {
     const errorMessage = "There should only be 1 start and 1 end symbol. Got: @: 0, x: 1";
 
-    await expect(() => getMapFromFile("./badPuzzles/missingStartCharacter.txt")).rejects.toThrowError(errorMessage);
+    expect(() => getMapFromFile("./badPuzzles/missingStartCharacter.txt")).toThrowError(errorMessage);
   });
 
-  test("Multiple start character should throw an error", async () => {
+  test("Multiple start character should throw an error", () => {
     const errorMessage = "There should only be 1 start and 1 end symbol. Got: @: 2, x: 1";
 
-    await expect(() => getMapFromFile("./badPuzzles/multipleStarts.txt")).rejects.toThrowError(errorMessage);
+    expect(() => getMapFromFile("./badPuzzles/multipleStarts.txt")).toThrowError(errorMessage);
   });
 
   test("Multiple points of start should throw an error", () => {
+    // Hardcoded because it has two "x" characters which throws the error before we start traversing
     const multipleStartingPaths = [["x", "-", "B", "-", "@", "-", "A", "-", "x"]];
     const errorMessage = "Multiple points of start";
 

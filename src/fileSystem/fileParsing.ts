@@ -10,16 +10,16 @@ export const MAP_FILES = {
   turnLetter: "./puzzles/lettersTurn.txt",
 };
 
-async function readFile(path: string) {
+function readFile(filePath: string) {
   try {
-    return await fs.readFileSync(path, { encoding: "utf-8" });
+    return fs.readFileSync(filePath, { encoding: "utf-8" });
   } catch (error) {
-    throw new Error(`File not found: ${error}`);
+    throw new Error(JSON.stringify(error));
   }
 }
 
-export async function getMapFromFile(path: string) {
-  const loadedFile = await readFile(path);
+export function getMapFromFile(filePath: string) {
+  const loadedFile = readFile(filePath);
 
   return parseFileToMatrix(loadedFile);
 }

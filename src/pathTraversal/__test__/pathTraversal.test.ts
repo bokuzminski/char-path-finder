@@ -6,10 +6,10 @@ describe("Test all the good puzzle inputs", () => {
     const puzzles = Object.values(testCases);
 
     for (const puzzle of puzzles) {
-      const result = followThePath(puzzle.map, puzzle.x, puzzle.y);
+      const { collectedLetters, pathTraversed } = followThePath(puzzle.map, puzzle.x, puzzle.y);
 
-      expect(result.pathTraversed).toMatch(puzzle.path);
-      expect(result.collectedLetters).toMatch(puzzle.letters);
+      expect(pathTraversed).toMatch(puzzle.path);
+      expect(collectedLetters).toMatch(puzzle.letters);
     }
   });
 });
