@@ -1,5 +1,6 @@
 import fs from "fs";
 import { ENDING_CHARACTER, STARTING_CHARACTER } from "../constants";
+import { MapFromFile } from "../pathTraversal/pathTraversalModel";
 
 export const MAP_FILES = {
   first: "./puzzles/basic.txt",
@@ -24,12 +25,12 @@ export function getMapFromFile(filePath: string) {
   return parseFileToMatrix(loadedFile);
 }
 
-function parseFileToMatrix(file: string) {
+function parseFileToMatrix(file: string): MapFromFile {
   const fileLines = file.split("\n");
   const parsedChars = fileLines.map((strItem) => strItem.split(""));
   const { startingRowIndex, startingColumnIndex } = checkIfStartingAndEndSymbolExistCorrectly(parsedChars);
 
-  return { puzzle: parsedChars, startingRow: startingRowIndex, startingColumn: startingColumnIndex };
+  return { map: parsedChars, startingRow: startingRowIndex, startingColumn: startingColumnIndex };
 }
 
 function checkIfStartingAndEndSymbolExistCorrectly(pathMap: string[][]) {

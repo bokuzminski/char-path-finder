@@ -10,38 +10,31 @@ import { characterIsLetterWeHaveToCollect } from "../helpers";
 import {
   CollectedCharactersList,
   MapFormat,
+  MapFromFile,
   Move,
   Path,
   TraveledPathResult,
   calculateTheMoveBasedOnIndexes,
 } from "./pathTraversalModel";
 
-export function followThePath(mapPath: MapFormat, startRow: number, startColumn: number): TraveledPathResult {
+export function followThePath({ map, startingRow, startingColumn }: MapFromFile): TraveledPathResult {
   let endReached = false;
-  let nextPathDirection: Path = { move: null, X: startRow, Y: startColumn };
+  let nextPathDirection: Path = { move: Move.NONE, X: startingRow, Y: startingColumn };
   let pathCompleted: string[] = [];
   const fullCharacterPath: CollectedCharactersList = [];
 
   while (!endReached) {
-    const currentCharacterWeAreOn = mapPath[nextPathDirection.X][nextPathDirection.Y];
+    const currentCharacterWeAreOn = map[nextPathDirection.X][nextPathDirection.Y];
     pathCompleted.push(currentCharacterWeAreOn);
 
     if (currentCharacterWeAreOn === STARTING_CHARACTER) {
-      const possibleMovesArray = foundNearByAvailableMoves(mapPath, nextPathDirection.X, nextPathDirection.Y);
-      if (possibleMovesArray.length > 1) {
-        throw new Error("Multiple points of start");
-      }
-      nextPathDirection = possibleMovesArray[0];
+      nextPathDirection = handleStartCharacter(map, nextPathDirection.X, nextPathDirection.Y);
     }
     if (currentCharacterWeAreOn === LEFT_RIGHT_CHARACTER || currentCharacterWeAreOn === UP_DOWN_CHARACTER) {
-      nextPathDirection = getNextPathItem(nextPathDirection.X, nextPathDirection.Y, nextPathDirection.move!);
+      nextPathDirection = getNextItemInPath(map, nextPathDirection);
     }
     if (currentCharacterWeAreOn === CORNER_CHARACTER) {
-      const cornerMove = whereToGoFromCorner(nextPathDirection.X, nextPathDirection.Y, nextPathDirection.move!);
-      if (cornerMove.length > 1) {
-        throw new Error("Fork in the path");
-      }
-      nextPathDirection = getNextPathItem(nextPathDirection.X, nextPathDirection.Y, cornerMove[0]);
+      nextPathDirection = handleCornerCharacter(map, nextPathDirection);
     }
     if (characterIsLetterWeHaveToCollect(currentCharacterWeAreOn)) {
       const characterWasNotCollected = !fullCharacterPath.some(
@@ -57,17 +50,7 @@ export function followThePath(mapPath: MapFormat, startRow: number, startColumn:
         });
       }
 
-      const letterIsACorner = !checkIfNextStepExists(nextPathDirection.move!, nextPathDirection.X, nextPathDirection.Y);
-      if (letterIsACorner) {
-        const cornerMove = whereToGoFromCorner(nextPathDirection.X, nextPathDirection.Y, nextPathDirection.move!);
-        if (cornerMove.length > 1) {
-          throw new Error("Fork in the path");
-        }
-        nextPathDirection = getNextPathItem(nextPathDirection.X, nextPathDirection.Y, cornerMove[0]);
-      } else {
-        const nextLetterInPath = getNextPathItem(nextPathDirection.X, nextPathDirection.Y, nextPathDirection.move!);
-        nextPathDirection = nextLetterInPath;
-      }
+      nextPathDirection = handleLetterWeNeedToCollect(map, nextPathDirection);
     }
     if (currentCharacterWeAreOn === ENDING_CHARACTER) {
       endReached = true;
@@ -78,59 +61,86 @@ export function followThePath(mapPath: MapFormat, startRow: number, startColumn:
   const pathTraversed = pathCompleted.join("");
 
   return { collectedLetters, pathTraversed };
+}
 
-  function getNextPathItem(row: number, column: number, move: Move): Path {
-    const [rowMove, columnMove] = MOVES_BASED_ON_DIRECTION[move];
-    const Y = columnMove + column;
-    const X = rowMove + row;
-
-    const moveIsPossibleAndExists = checkIfNextStepExists(move, row, column);
-    if (!moveIsPossibleAndExists) {
-      throw new Error("No possible moves available");
+function handleLetterWeNeedToCollect(map: MapFormat, nextPathDirection: Path) {
+  const letterIsACorner = !checkIfNextStepExists(map, nextPathDirection);
+  if (letterIsACorner) {
+    const cornerMove = whereToGoFromCorner(map, nextPathDirection);
+    if (cornerMove.length > 1) {
+      throw new Error("Fork in the path");
     }
-    return { move, X, Y };
-  }
-
-  function checkIfNextStepExists(move: Move, row: number, column: number) {
-    const moveValue = MOVES_BASED_ON_DIRECTION[move];
-
-    if (mapPath[moveValue[0] + row] === undefined) {
-      return false;
-    }
-    if (
-      mapPath[moveValue[0] + row][column + moveValue[1]] === undefined ||
-      mapPath[moveValue[0] + row][column + moveValue[1]] === " "
-    ) {
-      return false;
-    }
-
-    return true;
-  }
-
-  function whereToGoFromCorner(r: number, c: number, m: Move): Move[] {
-    const cornerGoesTheOppositeDirectionFromTheMove =
-      m === Move.LEFT || m === Move.RIGHT ? [Move.UP, Move.DOWN] : [Move.RIGHT, Move.LEFT];
-    const availableDirectionsForThisCorner = cornerGoesTheOppositeDirectionFromTheMove.filter((val) =>
-      checkIfNextStepExists(val, r, c)
-    );
-    const turnIsFake = availableDirectionsForThisCorner.length === 0;
-    if (turnIsFake) {
-      throw new Error("Fake turn");
-    }
-
-    return availableDirectionsForThisCorner;
+    return getNextItemInPath(map, {
+      ...nextPathDirection,
+      move: cornerMove[0],
+    });
+  } else {
+    return getNextItemInPath(map, nextPathDirection);
   }
 }
 
-function foundNearByAvailableMoves(mapPath: MapFormat, row: number, column: number): Path[] {
+function getNextItemInPath(map: MapFormat, nextPathDirection: Path): Path {
+  const [rowMove, columnMove] = MOVES_BASED_ON_DIRECTION[nextPathDirection.move];
+  const Y = columnMove + nextPathDirection.Y;
+  const X = rowMove + nextPathDirection.X;
+
+  const moveIsPossibleAndExists = checkIfNextStepExists(map, nextPathDirection);
+  if (!moveIsPossibleAndExists) {
+    throw new Error("No possible moves available, broken path");
+  }
+  return { move: nextPathDirection.move, X, Y };
+}
+
+function checkIfNextStepExists(map: MapFormat, nextPath: Path) {
+  const moveValue = MOVES_BASED_ON_DIRECTION[nextPath.move];
+
+  if (map[moveValue[0] + nextPath.X] === undefined) {
+    return false;
+  }
+  if (
+    map[moveValue[0] + nextPath.X][nextPath.Y + moveValue[1]] === undefined ||
+    map[moveValue[0] + nextPath.X][nextPath.Y + moveValue[1]] === " "
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+function whereToGoFromCorner(map: MapFormat, path: Path): Move[] {
+  const cornerGoesTheOppositeDirectionFromTheMove =
+    path.move === Move.LEFT || path.move === Move.RIGHT ? [Move.UP, Move.DOWN] : [Move.RIGHT, Move.LEFT];
+  const availableDirectionsForThisCorner = cornerGoesTheOppositeDirectionFromTheMove.filter((val) =>
+    checkIfNextStepExists(map, { ...path, move: val })
+  );
+  const turnIsFake = availableDirectionsForThisCorner.length === 0;
+  if (turnIsFake) {
+    throw new Error("Fake turn");
+  }
+
+  return availableDirectionsForThisCorner;
+}
+
+function handleStartCharacter(map: MapFormat, row: number, column: number) {
+  const possibleMovesArray = foundNearByAvailableMoves(map, row, column);
+  if (possibleMovesArray.length > 1) {
+    throw new Error("Multiple starting points");
+  }
+  return possibleMovesArray[0];
+}
+
+function foundNearByAvailableMoves(map: MapFormat, row: number, column: number): Path[] {
   const possiblePositionsFound: Path[] = [];
 
   for (const [rowValue, columnValue] of Object.values(MOVES_BASED_ON_DIRECTION)) {
+    const skipIterationOfNoneValue = rowValue === 0 && columnValue === 0;
+    if (skipIterationOfNoneValue) continue;
+
     const newRowValue = rowValue + row;
     const newColumnValue = columnValue + column;
 
-    const rowIsWithinBounds = mapPath[newRowValue];
-    const itemExists = rowIsWithinBounds && mapPath[newRowValue][newColumnValue];
+    const rowIsWithinBounds = map[newRowValue];
+    const itemExists = rowIsWithinBounds && map[newRowValue][newColumnValue];
     if (itemExists && itemExists !== " ") {
       possiblePositionsFound.push({
         move: calculateTheMoveBasedOnIndexes([rowValue, columnValue]),
@@ -141,4 +151,12 @@ function foundNearByAvailableMoves(mapPath: MapFormat, row: number, column: numb
   }
 
   return possiblePositionsFound;
+}
+
+function handleCornerCharacter(map: MapFormat, path: Path): Path {
+  const cornerMove = whereToGoFromCorner(map, path);
+  if (cornerMove.length > 1) {
+    throw new Error("Fork in the path");
+  }
+  return getNextItemInPath(map, { ...path, move: cornerMove[0] });
 }

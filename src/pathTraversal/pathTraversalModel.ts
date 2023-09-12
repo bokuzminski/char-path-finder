@@ -1,11 +1,16 @@
 export enum Move {
+  NONE = -1,
   UP,
   DOWN,
   LEFT,
   RIGHT,
 }
-
 export type MapFormat = string[][];
+export type MapFromFile = {
+  map: MapFormat;
+  startingRow: number;
+  startingColumn: number;
+};
 export type MoveDirection = [number, number];
 
 export type TraveledPathResult = {
@@ -13,9 +18,8 @@ export type TraveledPathResult = {
   pathTraversed: string;
 };
 export type CollectedCharactersList = { character: string; X: number; Y: number }[];
-
 export type Path = {
-  move: Move | null;
+  move: Move;
   X: number;
   Y: number;
 };
