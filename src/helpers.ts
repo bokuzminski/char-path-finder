@@ -8,10 +8,12 @@ export function calculateTheMoveBasedOnIndexes(move: MoveDirection): Exclude<Mov
   const [row, column] = move;
 
   if (row === 0) {
-    return column === 1 ? Move.RIGHT : Move.LEFT;
+    if (column === 1) return Move.RIGHT;
+    if (column === -1) return Move.LEFT;
   }
   if (column === 0) {
-    return row === 1 ? Move.DOWN : Move.UP;
+    if (row === 1) return Move.DOWN;
+    if (row === -1) return Move.UP;
   }
 
   throw new Error("Tuple containing the move is wrong");
