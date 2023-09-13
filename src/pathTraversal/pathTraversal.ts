@@ -21,14 +21,11 @@ export function followThePath({ map, startingRow, startingColumn }: MapFromFile)
 
     if (currentCharacterWeAreOn === STARTING_CHARACTER) {
       nextPathDirection = handleStartCharacter(map, nextPathDirection.X, nextPathDirection.Y);
-    }
-    if (currentCharacterWeAreOn === LEFT_RIGHT_CHARACTER || currentCharacterWeAreOn === UP_DOWN_CHARACTER) {
+    } else if (currentCharacterWeAreOn === LEFT_RIGHT_CHARACTER || currentCharacterWeAreOn === UP_DOWN_CHARACTER) {
       nextPathDirection = getNextItemInPath(map, nextPathDirection);
-    }
-    if (currentCharacterWeAreOn === CORNER_CHARACTER) {
+    } else if (currentCharacterWeAreOn === CORNER_CHARACTER) {
       nextPathDirection = handleCornerCharacter(map, nextPathDirection);
-    }
-    if (characterIsLetterWeHaveToCollect(currentCharacterWeAreOn)) {
+    } else if (characterIsLetterWeHaveToCollect(currentCharacterWeAreOn)) {
       const characterWasNotCollected = !fullCharacterPath.some(
         (item) =>
           item.character === currentCharacterWeAreOn && item.X === nextPathDirection.X && item.Y === nextPathDirection.Y
@@ -43,8 +40,7 @@ export function followThePath({ map, startingRow, startingColumn }: MapFromFile)
       }
 
       nextPathDirection = handleLetterWeNeedToCollect(map, nextPathDirection);
-    }
-    if (currentCharacterWeAreOn === ENDING_CHARACTER) {
+    } else if (currentCharacterWeAreOn === ENDING_CHARACTER) {
       endReached = true;
     }
   }
