@@ -6,7 +6,7 @@ export function findMoveAfterCorner(map: MapFormat, pathItem: CurrentPathItem): 
     pathItem.move === Move.LEFT || pathItem.move === Move.RIGHT ? [Move.UP, Move.DOWN] : [Move.RIGHT, Move.LEFT];
 
   const availableDirectionsForThisCorner = oppositeDirectionsFromThePath.filter((move) =>
-    checkIfNextStepExists(map, { ...pathItem, move })
+    checkIfNextMoveExists(map, { ...pathItem, move })
   );
   const turnIsFake = availableDirectionsForThisCorner.length === 0;
   if (turnIsFake) {
@@ -19,16 +19,16 @@ export function findMoveAfterCorner(map: MapFormat, pathItem: CurrentPathItem): 
   return availableDirectionsForThisCorner[0];
 }
 
-export function checkIfNextStepExists(map: MapFormat, nextStep: CurrentPathItem) {
-  const moveValue = MOVES_BASED_ON_DIRECTION[nextStep.move];
-  const rowIsOutOfBounds = !map[moveValue[0] + nextStep.currentRowIndex];
+export function checkIfNextMoveExists(map: MapFormat, { move, currentRowIndex, currentColumnIndex }: CurrentPathItem) {
+  const [rowMove, columnMove] = MOVES_BASED_ON_DIRECTION[move];
+  const rowIsOutOfBounds = !map[rowMove + currentRowIndex];
   if (rowIsOutOfBounds) {
     return false;
   }
 
-  const columnIsOutOfBounds = !map[moveValue[0] + nextStep.currentRowIndex][nextStep.currentColumnIndex + moveValue[1]];
-  const positionIsEmpty =
-    map[moveValue[0] + nextStep.currentRowIndex][nextStep.currentColumnIndex + moveValue[1]] === " ";
+  const columnIsOutOfBounds = !map[rowMove + currentRowIndex][currentColumnIndex + columnMove];
+  const foundPathItem = map[rowMove + currentRowIndex][currentColumnIndex + columnMove];
+  const positionIsEmpty = foundPathItem === " ";
 
   if (columnIsOutOfBounds || positionIsEmpty) {
     return false;

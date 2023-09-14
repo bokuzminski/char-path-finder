@@ -16,7 +16,7 @@ import {
 } from "./pathTraversalModel";
 import {
   characterIsLetterWeHaveToCollect,
-  checkIfNextStepExists,
+  checkIfNextMoveExists,
   findFirstMoveFromStartingSymbol,
   findMoveAfterCorner,
 } from "./pathTraversalService";
@@ -84,7 +84,7 @@ function parseNextCharacter(map: MapFormat, currentPathItem: CurrentPathItem) {
 }
 
 function handleLetterWeNeedToCollect(map: MapFormat, nextPathDirection: CurrentPathItem) {
-  const letterIsACorner = !checkIfNextStepExists(map, nextPathDirection);
+  const letterIsACorner = !checkIfNextMoveExists(map, nextPathDirection);
   if (!letterIsACorner) {
     return getNextItemInPath(map, nextPathDirection);
   }
@@ -99,7 +99,7 @@ function handleLetterWeNeedToCollect(map: MapFormat, nextPathDirection: CurrentP
 
 function getNextItemInPath(map: MapFormat, nextPathDirection: CurrentPathItem): CurrentPathItem {
   const [rowMove, columnMove] = MOVES_BASED_ON_DIRECTION[nextPathDirection.move];
-  const moveIsPossibleAndExists = checkIfNextStepExists(map, nextPathDirection);
+  const moveIsPossibleAndExists = checkIfNextMoveExists(map, nextPathDirection);
   if (!moveIsPossibleAndExists) {
     throw new Error("No possible moves available, broken path");
   }

@@ -3,7 +3,7 @@ import { Move } from "../pathTraversalModel";
 import {
   calculateTheMoveBasedOnIndexes,
   characterIsLetterWeHaveToCollect,
-  checkIfNextStepExists,
+  checkIfNextMoveExists,
   findFirstMoveFromStartingSymbol,
   findMoveAfterCorner,
 } from "../pathTraversalService";
@@ -87,12 +87,12 @@ describe("Test service functions", () => {
   test("test find next step function", () => {
     const workingMap = [["@", "-", "-", "-", "-", "-", "A", "-", "x"]];
     expect(
-      checkIfNextStepExists(workingMap, { move: Move.RIGHT, currentRowIndex: 0, currentColumnIndex: 1 })
+      checkIfNextMoveExists(workingMap, { move: Move.RIGHT, currentRowIndex: 0, currentColumnIndex: 1 })
     ).toBeTruthy();
 
     const brokenMap = [["@", "-", " ", "", "-", "-", "A", "-", "x"]];
     expect(
-      checkIfNextStepExists(brokenMap, { move: Move.RIGHT, currentRowIndex: 0, currentColumnIndex: 1 })
+      checkIfNextMoveExists(brokenMap, { move: Move.RIGHT, currentRowIndex: 0, currentColumnIndex: 1 })
     ).toBeFalsy();
   });
 });
