@@ -2,15 +2,6 @@ import fs from "fs";
 import { ENDING_CHARACTER, STARTING_CHARACTER } from "../constants";
 import { MapFromFile } from "../pathTraversal/pathTraversalModel";
 
-export const MAP_FILES = {
-  first: "./puzzles/basic.txt",
-  goonies: "./puzzles/goonies.txt",
-  compact: "./puzzles/compact.txt",
-  intersection: "./puzzles/intersection.txt",
-  noStart: "./puzzles/missingStartCharacter.txt",
-  turnLetter: "./puzzles/lettersTurn.txt",
-};
-
 function readFile(filePath: string) {
   try {
     return fs.readFileSync(filePath, { encoding: "utf-8" });

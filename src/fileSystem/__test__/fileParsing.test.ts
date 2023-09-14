@@ -18,7 +18,7 @@ describe("Test file loading and parsing", () => {
       startingColumn: 1,
     };
 
-    const result = getMapFromFile("./puzzles/goonies.txt");
+    const result = getMapFromFile("./maps/goonies.txt");
 
     expect(result).toEqual(correctValue);
   });

@@ -7,51 +7,63 @@ import {
   UP_DOWN_CHARACTER,
 } from "../constants";
 import { calculateTheMoveBasedOnIndexes, characterIsLetterWeHaveToCollect } from "../helpers";
-import { CollectedCharactersList, MapFormat, MapFromFile, Move, Path, TraveledPathResult } from "./pathTraversalModel";
+import {
+  CollectedCharactersList,
+  CurrentPathItem,
+  MapFormat,
+  MapFromFile,
+  Move,
+  TraveledPathResult,
+} from "./pathTraversalModel";
 
 export function followThePath({ map, startingRow, startingColumn }: MapFromFile): TraveledPathResult {
+  const collectedCharacters: CollectedCharactersList = [];
+  const completedPath: string[] = [];
   let endReached = false;
-  let nextPathDirection: Path = { move: Move.NONE, X: startingRow, Y: startingColumn };
-  let pathCompleted: string[] = [];
-  const fullCharacterPath: CollectedCharactersList = [];
+  let currentPathItem: CurrentPathItem = {
+    move: Move.NONE,
+    currentRowIndex: startingRow,
+    currentColumnIndex: startingColumn,
+  };
 
   while (!endReached) {
-    const currentCharacterWeAreOn = map[nextPathDirection.X][nextPathDirection.Y];
-    pathCompleted.push(currentCharacterWeAreOn);
+    const currentCharacterValue = map[currentPathItem.currentRowIndex][currentPathItem.currentColumnIndex];
+    completedPath.push(currentCharacterValue);
 
-    if (currentCharacterWeAreOn === STARTING_CHARACTER) {
-      nextPathDirection = handleStartCharacter(map, nextPathDirection.X, nextPathDirection.Y);
-    } else if (currentCharacterWeAreOn === LEFT_RIGHT_CHARACTER || currentCharacterWeAreOn === UP_DOWN_CHARACTER) {
-      nextPathDirection = getNextItemInPath(map, nextPathDirection);
-    } else if (currentCharacterWeAreOn === CORNER_CHARACTER) {
-      nextPathDirection = handleCornerCharacter(map, nextPathDirection);
-    } else if (characterIsLetterWeHaveToCollect(currentCharacterWeAreOn)) {
-      const characterWasNotCollected = !fullCharacterPath.some(
+    if (currentCharacterValue === STARTING_CHARACTER) {
+      currentPathItem = handleStartCharacter(map, currentPathItem.currentRowIndex, currentPathItem.currentColumnIndex);
+    } else if (currentCharacterValue === LEFT_RIGHT_CHARACTER || currentCharacterValue === UP_DOWN_CHARACTER) {
+      currentPathItem = getNextItemInPath(map, currentPathItem);
+    } else if (currentCharacterValue === CORNER_CHARACTER) {
+      currentPathItem = handleCornerCharacter(map, currentPathItem);
+    } else if (characterIsLetterWeHaveToCollect(currentCharacterValue)) {
+      const characterWasNotCollected = !collectedCharacters.some(
         (item) =>
-          item.character === currentCharacterWeAreOn && item.X === nextPathDirection.X && item.Y === nextPathDirection.Y
+          item.character === currentCharacterValue &&
+          item.characterRowLocation === currentPathItem.currentRowIndex &&
+          item.characterColumnLocation === currentPathItem.currentColumnIndex
       );
-
       if (characterWasNotCollected) {
-        fullCharacterPath.push({
-          character: currentCharacterWeAreOn,
-          X: nextPathDirection.X,
-          Y: nextPathDirection.Y,
+        collectedCharacters.push({
+          character: currentCharacterValue,
+          characterRowLocation: currentPathItem.currentRowIndex,
+          characterColumnLocation: currentPathItem.currentColumnIndex,
         });
       }
 
-      nextPathDirection = handleLetterWeNeedToCollect(map, nextPathDirection);
-    } else if (currentCharacterWeAreOn === ENDING_CHARACTER) {
+      currentPathItem = handleLetterWeNeedToCollect(map, currentPathItem);
+    } else if (currentCharacterValue === ENDING_CHARACTER) {
       endReached = true;
     }
   }
 
-  const collectedLetters = fullCharacterPath.map((obj) => obj.character).join("");
-  const pathTraversed = pathCompleted.join("");
+  const collectedLetters = collectedCharacters.map((obj) => obj.character).join("");
+  const pathTraversed = completedPath.join("");
 
   return { collectedLetters, pathTraversed };
 }
 
-function handleLetterWeNeedToCollect(map: MapFormat, nextPathDirection: Path) {
+function handleLetterWeNeedToCollect(map: MapFormat, nextPathDirection: CurrentPathItem) {
   const letterIsACorner = !checkIfNextStepExists(map, nextPathDirection);
   if (!letterIsACorner) {
     return getNextItemInPath(map, nextPathDirection);
@@ -67,27 +79,30 @@ function handleLetterWeNeedToCollect(map: MapFormat, nextPathDirection: Path) {
   });
 }
 
-function getNextItemInPath(map: MapFormat, nextPathDirection: Path): Path {
+function getNextItemInPath(map: MapFormat, nextPathDirection: CurrentPathItem): CurrentPathItem {
   const [rowMove, columnMove] = MOVES_BASED_ON_DIRECTION[nextPathDirection.move];
-  const Y = columnMove + nextPathDirection.Y;
-  const X = rowMove + nextPathDirection.X;
-
   const moveIsPossibleAndExists = checkIfNextStepExists(map, nextPathDirection);
   if (!moveIsPossibleAndExists) {
     throw new Error("No possible moves available, broken path");
   }
-  return { move: nextPathDirection.move, X, Y };
+
+  const nextRowIndex = rowMove + nextPathDirection.currentRowIndex;
+  const nextColumnIndex = columnMove + nextPathDirection.currentColumnIndex;
+
+  return { move: nextPathDirection.move, currentRowIndex: nextRowIndex, currentColumnIndex: nextColumnIndex };
 }
 
-function checkIfNextStepExists(map: MapFormat, nextPath: Path) {
-  const moveValue = MOVES_BASED_ON_DIRECTION[nextPath.move];
-  const rowIsOutOfBounds = map[moveValue[0] + nextPath.X] === undefined;
+function checkIfNextStepExists(map: MapFormat, nextStep: CurrentPathItem) {
+  const moveValue = MOVES_BASED_ON_DIRECTION[nextStep.move];
+  const rowIsOutOfBounds = !map[moveValue[0] + nextStep.currentRowIndex];
   if (rowIsOutOfBounds) {
     return false;
   }
 
-  const columnIsOutOfBounds = map[moveValue[0] + nextPath.X][nextPath.Y + moveValue[1]] === undefined;
-  const positionIsEmpty = map[moveValue[0] + nextPath.X][nextPath.Y + moveValue[1]] === " ";
+  const columnIsOutOfBounds = !map[moveValue[0] + nextStep.currentRowIndex][nextStep.currentColumnIndex + moveValue[1]];
+  const positionIsEmpty =
+    map[moveValue[0] + nextStep.currentRowIndex][nextStep.currentColumnIndex + moveValue[1]] === " ";
+
   if (columnIsOutOfBounds || positionIsEmpty) {
     return false;
   }
@@ -95,7 +110,7 @@ function checkIfNextStepExists(map: MapFormat, nextPath: Path) {
   return true;
 }
 
-function handleCornerCharacter(map: MapFormat, path: Path): Path {
+function handleCornerCharacter(map: MapFormat, path: CurrentPathItem): CurrentPathItem {
   const cornerMove = whereToGoFromCorner(map, path);
   if (cornerMove.length > 1) {
     throw new Error("Fork in the path");
@@ -103,9 +118,10 @@ function handleCornerCharacter(map: MapFormat, path: Path): Path {
   return getNextItemInPath(map, { ...path, move: cornerMove[0] });
 }
 
-function whereToGoFromCorner(map: MapFormat, path: Path): Move[] {
+function whereToGoFromCorner(map: MapFormat, path: CurrentPathItem): Move[] {
   const oppositeDirectionsFromThePath =
     path.move === Move.LEFT || path.move === Move.RIGHT ? [Move.UP, Move.DOWN] : [Move.RIGHT, Move.LEFT];
+
   const availableDirectionsForThisCorner = oppositeDirectionsFromThePath.filter((move) =>
     checkIfNextStepExists(map, { ...path, move })
   );
@@ -125,8 +141,8 @@ function handleStartCharacter(map: MapFormat, row: number, column: number) {
   return possibleMovesArray[0];
 }
 
-function foundNearByAvailableMoves(map: MapFormat, row: number, column: number): Path[] {
-  const possiblePositionsFound: Path[] = [];
+function foundNearByAvailableMoves(map: MapFormat, row: number, column: number): CurrentPathItem[] {
+  const possiblePositionsFound: CurrentPathItem[] = [];
 
   for (const [rowValue, columnValue] of Object.values(MOVES_BASED_ON_DIRECTION)) {
     const skipIterationOfNoneValue = rowValue === 0 && columnValue === 0;
@@ -140,8 +156,8 @@ function foundNearByAvailableMoves(map: MapFormat, row: number, column: number):
     if (itemExists && itemExists !== " ") {
       possiblePositionsFound.push({
         move: calculateTheMoveBasedOnIndexes([rowValue, columnValue]),
-        X: newRowValue,
-        Y: newColumnValue,
+        currentRowIndex: newRowValue,
+        currentColumnIndex: newColumnValue,
       });
     }
   }

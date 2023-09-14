@@ -1,5 +1,14 @@
 import { Move, MoveDirection } from "./pathTraversal/pathTraversalModel";
 
+export const MAP_FILES = {
+  first: "./maps/basic.txt",
+  goonies: "./maps/goonies.txt",
+  compact: "./maps/compact.txt",
+  intersection: "./maps/intersection.txt",
+  noStart: "./maps/missingStartCharacter.txt",
+  turnLetter: "./maps/lettersTurn.txt",
+};
+
 export const STARTING_CHARACTER = "@";
 export const ENDING_CHARACTER = "x";
 export const UP_DOWN_CHARACTER = "|";
