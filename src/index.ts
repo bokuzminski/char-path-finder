@@ -1,5 +1,5 @@
 import { MAP_FILES } from "./constants";
-import { getMapFromFile } from "./fileSystem/fileParsing";
+import { getMapFromFile } from "./fileParsing/fileParsing";
 import { followThePath } from "./pathTraversal/pathTraversal";
 
 (() => {

@@ -4,8 +4,8 @@ export function characterIsLetterWeHaveToCollect(character: string) {
   return character.length === 1 && character.match(/[A-Z]/);
 }
 
-export function calculateTheMoveBasedOnIndexes(move: MoveDirection): Exclude<Move, Move.NONE> {
-  const [row, column] = move;
+export function calculateTheMoveBasedOnIndexes(moveDirection: MoveDirection): Exclude<Move, Move.NONE> {
+  const [row, column] = moveDirection;
 
   if (row === 0) {
     if (column === 1) return Move.RIGHT;

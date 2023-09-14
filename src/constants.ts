@@ -1,7 +1,7 @@
 import { Move, MoveDirection } from "./pathTraversal/pathTraversalModel";
 
 export const MAP_FILES = {
-  first: "./maps/basic.txt",
+  basic: "./maps/basic.txt",
   goonies: "./maps/goonies.txt",
   compact: "./maps/compact.txt",
   intersection: "./maps/intersection.txt",

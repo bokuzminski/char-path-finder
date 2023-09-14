@@ -1,6 +1,12 @@
 import fs from "fs";
 import { ENDING_CHARACTER, STARTING_CHARACTER } from "../constants";
-import { MapFromFile } from "../pathTraversal/pathTraversalModel";
+import { MapFormat, MapFromFile } from "../pathTraversal/pathTraversalModel";
+
+export function getMapFromFile(filePath: string) {
+  const loadedFile = readFile(filePath);
+
+  return parseFileToMap(loadedFile);
+}
 
 function readFile(filePath: string) {
   try {
@@ -10,28 +16,22 @@ function readFile(filePath: string) {
   }
 }
 
-export function getMapFromFile(filePath: string) {
-  const loadedFile = readFile(filePath);
-
-  return parseFileToMatrix(loadedFile);
-}
-
-function parseFileToMatrix(file: string): MapFromFile {
+function parseFileToMap(file: string): MapFromFile {
   const fileLines = file.split("\n");
-  const parsedChars = fileLines.map((strItem) => strItem.split(""));
+  const parsedChars: MapFormat = fileLines.map((strItem) => strItem.split(""));
   const { startingRowIndex, startingColumnIndex } = checkIfStartingAndEndSymbolExistCorrectly(parsedChars);
 
   return { map: parsedChars, startingRow: startingRowIndex, startingColumn: startingColumnIndex };
 }
 
-function checkIfStartingAndEndSymbolExistCorrectly(pathMap: string[][]) {
+export function checkIfStartingAndEndSymbolExistCorrectly(pathMap: MapFormat) {
   let numberOfStartSymbols = 0;
   let numberOfEndSymbols = 0;
   let startingRowIndex = 0;
   let startingColumnIndex = 0;
 
-  pathMap.forEach((row, x) => {
-    row.forEach((character, y) => {
+  pathMap.forEach((column, x) => {
+    column.forEach((character, y) => {
       if (character === STARTING_CHARACTER) {
         numberOfStartSymbols++;
         startingRowIndex = x;
