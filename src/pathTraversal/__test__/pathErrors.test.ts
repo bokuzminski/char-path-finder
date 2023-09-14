@@ -43,4 +43,12 @@ describe("Test bad inputs", () => {
       errorMessage
     );
   });
+  test("Wrong character should throw an error", () => {
+    const multipleStartingPaths = [["@", "-", "B", "-", "%", "-", "A", "-", "x"]];
+    const errorMessage = "Invalid character found in the map";
+
+    expect(() => followThePath({ map: multipleStartingPaths, startingRow: 0, startingColumn: 4 })).toThrowError(
+      errorMessage
+    );
+  });
 });
