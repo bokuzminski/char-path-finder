@@ -6,7 +6,6 @@ import {
   STARTING_CHARACTER,
   UP_DOWN_CHARACTER,
 } from "../constants";
-import { calculateTheMoveBasedOnIndexes, characterIsLetterWeHaveToCollect } from "../helpers";
 import {
   CollectedCharactersList,
   CurrentPathItem,
@@ -15,6 +14,12 @@ import {
   Move,
   TraveledPathResult,
 } from "./pathTraversalModel";
+import {
+  characterIsLetterWeHaveToCollect,
+  checkIfNextStepExists,
+  findMovesNearTheCharacter,
+  whereToGoFromCorner,
+} from "./pathTraversalService";
 
 export function followThePath({ map, startingRow, startingColumn }: MapFromFile): TraveledPathResult {
   const collectedCharacters: CollectedCharactersList = [];
@@ -105,46 +110,10 @@ function getNextItemInPath(map: MapFormat, nextPathDirection: CurrentPathItem): 
   return { move: nextPathDirection.move, currentRowIndex: nextRowIndex, currentColumnIndex: nextColumnIndex };
 }
 
-function checkIfNextStepExists(map: MapFormat, nextStep: CurrentPathItem) {
-  const moveValue = MOVES_BASED_ON_DIRECTION[nextStep.move];
-  const rowIsOutOfBounds = !map[moveValue[0] + nextStep.currentRowIndex];
-  if (rowIsOutOfBounds) {
-    return false;
-  }
-
-  const columnIsOutOfBounds = !map[moveValue[0] + nextStep.currentRowIndex][nextStep.currentColumnIndex + moveValue[1]];
-  const positionIsEmpty =
-    map[moveValue[0] + nextStep.currentRowIndex][nextStep.currentColumnIndex + moveValue[1]] === " ";
-
-  if (columnIsOutOfBounds || positionIsEmpty) {
-    return false;
-  }
-
-  return true;
-}
-
 function handleCornerCharacter(map: MapFormat, pathItem: CurrentPathItem): CurrentPathItem {
   const cornerMove = whereToGoFromCorner(map, pathItem);
 
   return getNextItemInPath(map, { ...pathItem, move: cornerMove });
-}
-
-function whereToGoFromCorner(map: MapFormat, pathItem: CurrentPathItem): Move {
-  const oppositeDirectionsFromThePath =
-    pathItem.move === Move.LEFT || pathItem.move === Move.RIGHT ? [Move.UP, Move.DOWN] : [Move.RIGHT, Move.LEFT];
-
-  const availableDirectionsForThisCorner = oppositeDirectionsFromThePath.filter((move) =>
-    checkIfNextStepExists(map, { ...pathItem, move })
-  );
-  const turnIsFake = availableDirectionsForThisCorner.length === 0;
-  if (turnIsFake) {
-    throw new Error("Fake turn");
-  }
-  if (availableDirectionsForThisCorner.length > 1) {
-    throw new Error("Fork in the path");
-  }
-
-  return availableDirectionsForThisCorner[0];
 }
 
 function handleStartCharacter(map: MapFormat, row: number, column: number) {
@@ -153,28 +122,4 @@ function handleStartCharacter(map: MapFormat, row: number, column: number) {
     throw new Error("Multiple starting points");
   }
   return possibleMovesArray[0];
-}
-
-function findMovesNearTheCharacter(map: MapFormat, row: number, column: number): CurrentPathItem[] {
-  const possiblePositionsFound: CurrentPathItem[] = [];
-
-  for (const [rowValue, columnValue] of Object.values(MOVES_BASED_ON_DIRECTION)) {
-    const skipIterationOfNoneValue = rowValue === 0 && columnValue === 0;
-    if (skipIterationOfNoneValue) continue;
-
-    const newRowValue = rowValue + row;
-    const newColumnValue = columnValue + column;
-
-    const rowIsWithinBounds = map[newRowValue];
-    const itemExists = rowIsWithinBounds && map[newRowValue][newColumnValue];
-    if (itemExists && itemExists !== " ") {
-      possiblePositionsFound.push({
-        move: calculateTheMoveBasedOnIndexes([rowValue, columnValue]),
-        currentRowIndex: newRowValue,
-        currentColumnIndex: newColumnValue,
-      });
-    }
-  }
-
-  return possiblePositionsFound;
 }

@@ -1,5 +1,5 @@
-import { calculateTheMoveBasedOnIndexes, characterIsLetterWeHaveToCollect } from "../helpers";
-import { Move } from "../pathTraversal/pathTraversalModel";
+import { Move } from "../pathTraversalModel";
+import { calculateTheMoveBasedOnIndexes, characterIsLetterWeHaveToCollect } from "../pathTraversalService";
 
 describe("Test helper functions", () => {
   test("should detect incorrect characters", () => {
