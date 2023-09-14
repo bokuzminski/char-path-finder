@@ -1,6 +1,19 @@
 import { MOVES_BASED_ON_DIRECTION } from "../constants";
 import { CurrentPathItem, MapFormat, Move, MoveDirection } from "./pathTraversalModel";
 
+export function getNextItemInPath(map: MapFormat, nextPathDirection: CurrentPathItem): CurrentPathItem {
+  const [rowMove, columnMove] = MOVES_BASED_ON_DIRECTION[nextPathDirection.move];
+  const moveIsPossibleAndExists = checkIfNextMoveExists(map, nextPathDirection);
+  if (!moveIsPossibleAndExists) {
+    throw new Error("No possible moves available, broken path");
+  }
+
+  const nextRowIndex = rowMove + nextPathDirection.currentRowIndex;
+  const nextColumnIndex = columnMove + nextPathDirection.currentColumnIndex;
+
+  return { move: nextPathDirection.move, currentRowIndex: nextRowIndex, currentColumnIndex: nextColumnIndex };
+}
+
 export function findMoveAfterCorner(map: MapFormat, pathItem: CurrentPathItem): Move {
   const oppositeDirectionsFromThePath =
     pathItem.move === Move.LEFT || pathItem.move === Move.RIGHT ? [Move.UP, Move.DOWN] : [Move.RIGHT, Move.LEFT];

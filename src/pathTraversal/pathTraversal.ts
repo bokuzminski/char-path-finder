@@ -2,7 +2,6 @@ import {
   CORNER_CHARACTER,
   ENDING_CHARACTER,
   LEFT_RIGHT_CHARACTER,
-  MOVES_BASED_ON_DIRECTION,
   STARTING_CHARACTER,
   UP_DOWN_CHARACTER,
 } from "../constants";
@@ -19,6 +18,7 @@ import {
   checkIfNextMoveExists,
   findFirstMoveFromStartingSymbol,
   findMoveAfterCorner,
+  getNextItemInPath,
 } from "./pathTraversalService";
 
 export function followThePath({ map, startingRow, startingColumn }: MapFromFile): TraveledPathResult {
@@ -95,19 +95,6 @@ function handleLetterWeNeedToCollect(map: MapFormat, nextPathDirection: CurrentP
     ...nextPathDirection,
     move: cornerMove,
   });
-}
-
-function getNextItemInPath(map: MapFormat, nextPathDirection: CurrentPathItem): CurrentPathItem {
-  const [rowMove, columnMove] = MOVES_BASED_ON_DIRECTION[nextPathDirection.move];
-  const moveIsPossibleAndExists = checkIfNextMoveExists(map, nextPathDirection);
-  if (!moveIsPossibleAndExists) {
-    throw new Error("No possible moves available, broken path");
-  }
-
-  const nextRowIndex = rowMove + nextPathDirection.currentRowIndex;
-  const nextColumnIndex = columnMove + nextPathDirection.currentColumnIndex;
-
-  return { move: nextPathDirection.move, currentRowIndex: nextRowIndex, currentColumnIndex: nextColumnIndex };
 }
 
 function handleCornerCharacter(map: MapFormat, pathItem: CurrentPathItem): CurrentPathItem {

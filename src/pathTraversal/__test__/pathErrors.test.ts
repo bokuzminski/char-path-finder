@@ -4,7 +4,7 @@ import { followThePath } from "../pathTraversal";
 describe("Test bad inputs", () => {
   test("Broken path should throw an error", () => {
     const map = getMapFromFile("./badmaps/brokenPath.txt");
-    expect(() => followThePath(map)).toThrowError("No possible moves available");
+    expect(() => followThePath(map)).toThrowError("No possible moves available, broken path");
   });
 
   test("Fake turn should throw an error", () => {
