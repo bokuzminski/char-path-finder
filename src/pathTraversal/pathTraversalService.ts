@@ -1,7 +1,7 @@
 import { MOVES_BASED_ON_DIRECTION } from "../constants";
 import { CurrentPathItem, MapFormat, Move, MoveDirection } from "./pathTraversalModel";
 
-export function whereToGoFromCorner(map: MapFormat, pathItem: CurrentPathItem): Move {
+export function findMoveAfterCorner(map: MapFormat, pathItem: CurrentPathItem): Move {
   const oppositeDirectionsFromThePath =
     pathItem.move === Move.LEFT || pathItem.move === Move.RIGHT ? [Move.UP, Move.DOWN] : [Move.RIGHT, Move.LEFT];
 
@@ -37,7 +37,7 @@ export function checkIfNextStepExists(map: MapFormat, nextStep: CurrentPathItem)
   return true;
 }
 
-export function findMovesNearTheCharacter(map: MapFormat, row: number, column: number): CurrentPathItem[] {
+export function findFirstMoveFromStartingSymbol(map: MapFormat, row: number, column: number): CurrentPathItem[] {
   const possiblePositionsFound: CurrentPathItem[] = [];
 
   for (const [rowValue, columnValue] of Object.values(MOVES_BASED_ON_DIRECTION)) {

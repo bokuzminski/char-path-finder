@@ -4,23 +4,23 @@ import {
   calculateTheMoveBasedOnIndexes,
   characterIsLetterWeHaveToCollect,
   checkIfNextStepExists,
-  findMovesNearTheCharacter,
-  whereToGoFromCorner,
+  findFirstMoveFromStartingSymbol,
+  findMoveAfterCorner,
 } from "../pathTraversalService";
 
 describe("Test service functions", () => {
   test("should calculate where to go on a corner", () => {
     const map = testCases[1].map;
-    const cornerMove = whereToGoFromCorner(map, { move: Move.RIGHT, currentRowIndex: 2, currentColumnIndex: 2 });
+    const cornerMove = findMoveAfterCorner(map, { move: Move.RIGHT, currentRowIndex: 2, currentColumnIndex: 2 });
     expect(cornerMove).toBe(Move.DOWN);
 
-    const secondCornerMove = whereToGoFromCorner(map, { move: cornerMove, currentRowIndex: 3, currentColumnIndex: 2 });
+    const secondCornerMove = findMoveAfterCorner(map, { move: cornerMove, currentRowIndex: 3, currentColumnIndex: 2 });
     expect(secondCornerMove).toBe(Move.LEFT);
   });
 
   test("should correctly find the first move from starting position", () => {
     const map = testCases[1].map;
-    const possibleMoves = findMovesNearTheCharacter(map, 2, 0);
+    const possibleMoves = findFirstMoveFromStartingSymbol(map, 2, 0);
     const expectedResult = [{ currentColumnIndex: 1, currentRowIndex: 2, move: "Right" }];
 
     expect(possibleMoves).toEqual(expectedResult);
@@ -33,7 +33,7 @@ describe("Test service functions", () => {
       ["@", "B", "+", " ", "+", "+", " ", "H"],
       ["+", "+", "+", " ", " ", " ", " ", "x"],
     ];
-    const possibleMoves = findMovesNearTheCharacter(map, 2, 0);
+    const possibleMoves = findFirstMoveFromStartingSymbol(map, 2, 0);
 
     expect(possibleMoves.length).toBe(2);
   });

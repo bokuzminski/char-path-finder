@@ -17,8 +17,8 @@ import {
 import {
   characterIsLetterWeHaveToCollect,
   checkIfNextStepExists,
-  findMovesNearTheCharacter,
-  whereToGoFromCorner,
+  findFirstMoveFromStartingSymbol,
+  findMoveAfterCorner,
 } from "./pathTraversalService";
 
 export function followThePath({ map, startingRow, startingColumn }: MapFromFile): TraveledPathResult {
@@ -45,17 +45,17 @@ export function followThePath({ map, startingRow, startingColumn }: MapFromFile)
     currentPathItem = parseNextCharacter(map, currentPathItem);
   }
 
-  const collectedLetters = collectedCharacters.map((obj) => obj.character).join("");
+  const collectedLetters = collectedCharacters.map(({ character }) => character).join("");
   const pathTraversed = completedPath.join("");
 
   return { collectedLetters, pathTraversed };
 
   function collectLetter(currentCharacterValue: string) {
     const characterWasNotCollected = !collectedCharacters.some(
-      (item) =>
-        item.character === currentCharacterValue &&
-        item.characterRowLocation === currentPathItem.currentRowIndex &&
-        item.characterColumnLocation === currentPathItem.currentColumnIndex
+      ({ character, characterColumnLocation, characterRowLocation }) =>
+        character === currentCharacterValue &&
+        characterRowLocation === currentPathItem.currentRowIndex &&
+        characterColumnLocation === currentPathItem.currentColumnIndex
     );
     if (characterWasNotCollected) {
       collectedCharacters.push({
@@ -89,7 +89,7 @@ function handleLetterWeNeedToCollect(map: MapFormat, nextPathDirection: CurrentP
     return getNextItemInPath(map, nextPathDirection);
   }
 
-  const cornerMove = whereToGoFromCorner(map, nextPathDirection);
+  const cornerMove = findMoveAfterCorner(map, nextPathDirection);
 
   return getNextItemInPath(map, {
     ...nextPathDirection,
@@ -111,15 +111,16 @@ function getNextItemInPath(map: MapFormat, nextPathDirection: CurrentPathItem): 
 }
 
 function handleCornerCharacter(map: MapFormat, pathItem: CurrentPathItem): CurrentPathItem {
-  const cornerMove = whereToGoFromCorner(map, pathItem);
+  const cornerMove = findMoveAfterCorner(map, pathItem);
 
   return getNextItemInPath(map, { ...pathItem, move: cornerMove });
 }
 
 function handleStartCharacter(map: MapFormat, row: number, column: number) {
-  const possibleMovesArray = findMovesNearTheCharacter(map, row, column);
+  const possibleMovesArray = findFirstMoveFromStartingSymbol(map, row, column);
   if (possibleMovesArray.length > 1) {
     throw new Error("Multiple starting points");
   }
+
   return possibleMovesArray[0];
 }
