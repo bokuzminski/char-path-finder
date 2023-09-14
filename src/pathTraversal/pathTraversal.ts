@@ -85,12 +85,10 @@ function handleLetterWeNeedToCollect(map: MapFormat, nextPathDirection: CurrentP
   }
 
   const cornerMove = whereToGoFromCorner(map, nextPathDirection);
-  if (cornerMove.length > 1) {
-    throw new Error("Fork in the path");
-  }
+
   return getNextItemInPath(map, {
     ...nextPathDirection,
-    move: cornerMove[0],
+    move: cornerMove,
   });
 }
 
@@ -127,13 +125,11 @@ function checkIfNextStepExists(map: MapFormat, nextStep: CurrentPathItem) {
 
 function handleCornerCharacter(map: MapFormat, pathItem: CurrentPathItem): CurrentPathItem {
   const cornerMove = whereToGoFromCorner(map, pathItem);
-  if (cornerMove.length > 1) {
-    throw new Error("Fork in the path");
-  }
-  return getNextItemInPath(map, { ...pathItem, move: cornerMove[0] });
+
+  return getNextItemInPath(map, { ...pathItem, move: cornerMove });
 }
 
-function whereToGoFromCorner(map: MapFormat, pathItem: CurrentPathItem): Move[] {
+function whereToGoFromCorner(map: MapFormat, pathItem: CurrentPathItem): Move {
   const oppositeDirectionsFromThePath =
     pathItem.move === Move.LEFT || pathItem.move === Move.RIGHT ? [Move.UP, Move.DOWN] : [Move.RIGHT, Move.LEFT];
 
@@ -144,19 +140,22 @@ function whereToGoFromCorner(map: MapFormat, pathItem: CurrentPathItem): Move[] 
   if (turnIsFake) {
     throw new Error("Fake turn");
   }
+  if (availableDirectionsForThisCorner.length > 1) {
+    throw new Error("Fork in the path");
+  }
 
-  return availableDirectionsForThisCorner;
+  return availableDirectionsForThisCorner[0];
 }
 
 function handleStartCharacter(map: MapFormat, row: number, column: number) {
-  const possibleMovesArray = foundNearByAvailableMoves(map, row, column);
+  const possibleMovesArray = findMovesNearTheCharacter(map, row, column);
   if (possibleMovesArray.length > 1) {
     throw new Error("Multiple starting points");
   }
   return possibleMovesArray[0];
 }
 
-function foundNearByAvailableMoves(map: MapFormat, row: number, column: number): CurrentPathItem[] {
+function findMovesNearTheCharacter(map: MapFormat, row: number, column: number): CurrentPathItem[] {
   const possiblePositionsFound: CurrentPathItem[] = [];
 
   for (const [rowValue, columnValue] of Object.values(MOVES_BASED_ON_DIRECTION)) {
