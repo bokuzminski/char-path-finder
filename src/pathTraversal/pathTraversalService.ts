@@ -1,5 +1,4 @@
-import { MOVES_BASED_ON_DIRECTION } from "../constants";
-import { CurrentPathItem, MapFormat, Move, MoveDirection } from "./pathTraversalModel";
+import { CurrentPathItem, MOVES_BASED_ON_DIRECTION, MapFormat, Move, MoveDirection } from "./pathTraversalModel";
 
 export function getNextItemInPath(map: MapFormat, nextPathDirection: CurrentPathItem): CurrentPathItem {
   const [rowMove, columnMove] = MOVES_BASED_ON_DIRECTION[nextPathDirection.move];
