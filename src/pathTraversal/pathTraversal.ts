@@ -32,11 +32,12 @@ export function followThePath({ map, startingRow, startingColumn }: MapFromFile)
 
     if (currentCharacterValue === ENDING_CHARACTER) {
       endReached = true;
+      break;
     }
     if (characterIsLetterWeHaveToCollect(currentCharacterValue)) {
       collectLetter(currentCharacterValue);
     }
-    currentPathItem = parseNextCharacter(map, currentPathItem)!;
+    currentPathItem = parseNextCharacter(map, currentPathItem);
   }
 
   const collectedLetters = collectedCharacters.map((obj) => obj.character).join("");
@@ -73,6 +74,8 @@ function parseNextCharacter(map: MapFormat, currentPathItem: CurrentPathItem) {
   } else if (characterIsLetterWeHaveToCollect(character)) {
     return handleLetterWeNeedToCollect(map, currentPathItem);
   }
+
+  throw new Error("Invalid character found in the map");
 }
 
 function handleLetterWeNeedToCollect(map: MapFormat, nextPathDirection: CurrentPathItem) {
