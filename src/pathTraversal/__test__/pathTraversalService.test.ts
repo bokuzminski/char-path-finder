@@ -1,5 +1,9 @@
 import { Move } from "../pathTraversalModel";
-import { calculateTheMoveBasedOnIndexes, characterIsLetterWeHaveToCollect } from "../pathTraversalService";
+import {
+  calculateTheMoveBasedOnIndexes,
+  characterIsLetterWeHaveToCollect,
+  checkIfNextStepExists,
+} from "../pathTraversalService";
 
 describe("Test helper functions", () => {
   test("should detect incorrect characters", () => {
@@ -46,5 +50,17 @@ describe("Test helper functions", () => {
     expect(() => calculateTheMoveBasedOnIndexes([-1, -1])).toThrowError("Tuple containing the move is wrong");
     expect(() => calculateTheMoveBasedOnIndexes([-1, 2])).toThrowError("Tuple containing the move is wrong");
     expect(() => calculateTheMoveBasedOnIndexes([NaN, NaN])).toThrowError("Tuple containing the move is wrong");
+  });
+
+  test("test find next step function", () => {
+    const workingMap = [["@", "-", "-", "-", "-", "-", "A", "-", "x"]];
+    expect(
+      checkIfNextStepExists(workingMap, { move: Move.RIGHT, currentRowIndex: 0, currentColumnIndex: 1 })
+    ).toBeTruthy();
+
+    const brokenMap = [["@", "-", " ", "", "-", "-", "A", "-", "x"]];
+    expect(
+      checkIfNextStepExists(brokenMap, { move: Move.RIGHT, currentRowIndex: 0, currentColumnIndex: 1 })
+    ).toBeFalsy();
   });
 });
