@@ -11,6 +11,4 @@ By default it will pass the puzzle that outputs GOONIES. The tests iterate and r
 ## Test plan
 
 The first thing that is tested is the file loading and parsing. This makes sure the file is loaded correctly and then parsed in the correct format.
-The path traversal is tested in two different tests. One tests all the edge cases and errors and the second loops over a mock JSON with the correct values and runs them against the main loop.
-
-I wrote a short script to generate the JSON but deleted it after it was done as there is no need to keep regenerating the mock file.
+The path traversal is tested in 3 different tests. One tests all the edge cases and errors while the other two test the functions that are used for traversing the path.
