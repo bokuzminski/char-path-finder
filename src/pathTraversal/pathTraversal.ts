@@ -30,37 +30,49 @@ export function followThePath({ map, startingRow, startingColumn }: MapFromFile)
     const currentCharacterValue = map[currentPathItem.currentRowIndex][currentPathItem.currentColumnIndex];
     completedPath.push(currentCharacterValue);
 
-    if (currentCharacterValue === STARTING_CHARACTER) {
-      currentPathItem = handleStartCharacter(map, currentPathItem.currentRowIndex, currentPathItem.currentColumnIndex);
-    } else if (currentCharacterValue === LEFT_RIGHT_CHARACTER || currentCharacterValue === UP_DOWN_CHARACTER) {
-      currentPathItem = getNextItemInPath(map, currentPathItem);
-    } else if (currentCharacterValue === CORNER_CHARACTER) {
-      currentPathItem = handleCornerCharacter(map, currentPathItem);
-    } else if (characterIsLetterWeHaveToCollect(currentCharacterValue)) {
-      const characterWasNotCollected = !collectedCharacters.some(
-        (item) =>
-          item.character === currentCharacterValue &&
-          item.characterRowLocation === currentPathItem.currentRowIndex &&
-          item.characterColumnLocation === currentPathItem.currentColumnIndex
-      );
-      if (characterWasNotCollected) {
-        collectedCharacters.push({
-          character: currentCharacterValue,
-          characterRowLocation: currentPathItem.currentRowIndex,
-          characterColumnLocation: currentPathItem.currentColumnIndex,
-        });
-      }
-
-      currentPathItem = handleLetterWeNeedToCollect(map, currentPathItem);
-    } else if (currentCharacterValue === ENDING_CHARACTER) {
+    if (currentCharacterValue === ENDING_CHARACTER) {
       endReached = true;
     }
+    if (characterIsLetterWeHaveToCollect(currentCharacterValue)) {
+      collectLetter(currentCharacterValue);
+    }
+    currentPathItem = parseNextCharacter(map, currentPathItem)!;
   }
 
   const collectedLetters = collectedCharacters.map((obj) => obj.character).join("");
   const pathTraversed = completedPath.join("");
 
   return { collectedLetters, pathTraversed };
+
+  function collectLetter(currentCharacterValue: string) {
+    const characterWasNotCollected = !collectedCharacters.some(
+      (item) =>
+        item.character === currentCharacterValue &&
+        item.characterRowLocation === currentPathItem.currentRowIndex &&
+        item.characterColumnLocation === currentPathItem.currentColumnIndex
+    );
+    if (characterWasNotCollected) {
+      collectedCharacters.push({
+        character: currentCharacterValue,
+        characterRowLocation: currentPathItem.currentRowIndex,
+        characterColumnLocation: currentPathItem.currentColumnIndex,
+      });
+    }
+  }
+}
+
+function parseNextCharacter(map: MapFormat, currentPathItem: CurrentPathItem) {
+  const character = map[currentPathItem.currentRowIndex][currentPathItem.currentColumnIndex];
+
+  if (character === STARTING_CHARACTER) {
+    return handleStartCharacter(map, currentPathItem.currentRowIndex, currentPathItem.currentColumnIndex);
+  } else if (character === LEFT_RIGHT_CHARACTER || character === UP_DOWN_CHARACTER) {
+    return getNextItemInPath(map, currentPathItem);
+  } else if (character === CORNER_CHARACTER) {
+    return handleCornerCharacter(map, currentPathItem);
+  } else if (characterIsLetterWeHaveToCollect(character)) {
+    return handleLetterWeNeedToCollect(map, currentPathItem);
+  }
 }
 
 function handleLetterWeNeedToCollect(map: MapFormat, nextPathDirection: CurrentPathItem) {
@@ -110,20 +122,20 @@ function checkIfNextStepExists(map: MapFormat, nextStep: CurrentPathItem) {
   return true;
 }
 
-function handleCornerCharacter(map: MapFormat, path: CurrentPathItem): CurrentPathItem {
-  const cornerMove = whereToGoFromCorner(map, path);
+function handleCornerCharacter(map: MapFormat, pathItem: CurrentPathItem): CurrentPathItem {
+  const cornerMove = whereToGoFromCorner(map, pathItem);
   if (cornerMove.length > 1) {
     throw new Error("Fork in the path");
   }
-  return getNextItemInPath(map, { ...path, move: cornerMove[0] });
+  return getNextItemInPath(map, { ...pathItem, move: cornerMove[0] });
 }
 
-function whereToGoFromCorner(map: MapFormat, path: CurrentPathItem): Move[] {
+function whereToGoFromCorner(map: MapFormat, pathItem: CurrentPathItem): Move[] {
   const oppositeDirectionsFromThePath =
-    path.move === Move.LEFT || path.move === Move.RIGHT ? [Move.UP, Move.DOWN] : [Move.RIGHT, Move.LEFT];
+    pathItem.move === Move.LEFT || pathItem.move === Move.RIGHT ? [Move.UP, Move.DOWN] : [Move.RIGHT, Move.LEFT];
 
   const availableDirectionsForThisCorner = oppositeDirectionsFromThePath.filter((move) =>
-    checkIfNextStepExists(map, { ...path, move })
+    checkIfNextStepExists(map, { ...pathItem, move })
   );
   const turnIsFake = availableDirectionsForThisCorner.length === 0;
   if (turnIsFake) {

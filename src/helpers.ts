@@ -1,7 +1,7 @@
 import { Move, MoveDirection } from "./pathTraversal/pathTraversalModel";
 
 export function characterIsLetterWeHaveToCollect(character: string) {
-  return character.length === 1 && character.match(/[A-Z]/);
+  return character.length === 1 && /[A-Z]/.test(character);
 }
 
 export function calculateTheMoveBasedOnIndexes(moveDirection: MoveDirection): Exclude<Move, Move.NONE> {
